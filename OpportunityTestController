@@ -1,0 +1,23 @@
+public class OpportunityTestController {
+    public static void testCOndition(List<Opportunity> oppLIst,Map<id,Opportunity> oldOppMap){
+        for (Opportunity opp : oppLIst) {
+            if (opp.CloseDate < Date.today()) {
+                opp.CloseDate.addError('Opportunity cannot have a Close Date in the past.');
+            }
+            if (opp.StageName == 'Closed Won' && oldOppMap.get(opp.Id).StageName == 'Prospecting') {
+                opp.StageName.addError('Opportunity cannot transition directly from Prospecting to Closed Won.');
+            }            
+            if (opp.StageName == 'Closed Won' && opp.Amount < 10000) {
+                opp.StageName.addError('Opportunity in Closed Won stage must have an Amount greater than or equal to amount 10,000.');
+            }
+        }
+    }
+}
+
+// Trigger Name:
+----------------
+trigger OpportunityTrigger on Opportunity (before insert, before update, after insert, after update) {
+    if(Trigger.isBefore && Trigger.isUpdate){
+        OpportunityTestController.testCOndition(Trigger.New, Trigger.oldMap);
+    }
+}
